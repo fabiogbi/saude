@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0ea5e9" />
+
+  <link rel="manifest" href="./manifest.json" />
+  <link rel="icon" href="./icon-192.png" />
+  <link rel="apple-touch-icon" href="./icon-192.png" />
+  <link rel="stylesheet" href="./styles.css" />
+
+  <title>Saúde: Remédios + Água</title>
+</head>
+
+<body>
+  <header class="top">
+    <div>
+      <h1>Saúde</h1>
+      <p class="muted">Remédios + Água — PWA offline</p>
+    </div>
+
+    <div class="row gap wrap right">
+      <select id="profileSelect" class="select"></select>
+      <button id="btnAddProfile" class="btn ghost">+ Perfil</button>
+      <button id="btnTheme" class="btn ghost" title="Alternar tema">🌙</button>
+      <button id="btnInstall" class="btn ghost" hidden>Instalar</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="card">
+      <div class="row between wrap gap">
+        <h2>Hoje</h2>
+        <div class="row gap wrap">
+          <button id="btnNotify" class="btn">Ativar notificações</button>
+          <button id="btnDailyReport" class="btn ghost">Relatório do dia</button>
+          <button id="btnResetDay" class="btn danger">Reset do dia</button>
+        </div>
+      </div>
+
+      <div class="grid3">
+        <div class="panel">
+          <h3>Próximo remédio</h3>
+          <div id="nextMedBox" class="bigBox">
+            <div class="muted small">Cadastre remédios para ver o próximo horário.</div>
+          </div>
+          <div class="row gap wrap">
+            <span class="badge">Atrasados: <strong id="overdueCount">0</strong></span>
+            <span class="badge">Tomados hoje: <strong id="takenCount">0</strong></span>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h3>Água (ml)</h3>
+
+          <div class="waterStats">
+            <div><span class="muted">Meta:</span> <strong id="waterGoalLbl">2000</strong> ml</div>
+            <div><span class="muted">Hoje:</span> <strong id="waterTodayLbl">0</strong> ml</div>
+          </div>
+
+          <div class="progress">
+            <div class="bar" id="waterBar" style="width:0%"></div>
+          </div>
+
+          <div id="waterPace" class="muted small"></div>
+
+          <div class="row gap wrap">
+            <input id="waterGoal" type="number" min="0" step="50" placeholder="Meta (ml)" inputmode="numeric" />
+            <button class="btn" id="btnSetGoal">Salvar meta</button>
+          </div>
+
+          <div class="row gap wrap">
+            <button class="btn" data-addwater="200">+200</button>
+            <button class="btn" data-addwater="250">+250</button>
+            <button class="btn" data-addwater="300">+300</button>
+            <button class="btn ghost" id="btnAddCustom">+ Personalizado</button>
+          </div>
+
+          <div id="waterLog" class="log"></div>
+        </div>
+
+        <div class="panel">
+          <h3>Config rápida</h3>
+
+          <div class="row gap wrap">
+            <label class="field">
+              <span class="muted small">Acordo (p/ ritmo da água)</span>
+              <input id="wakeTime" placeholder="07:00" />
+            </label>
+
+            <label class="field">
+              <span class="muted small">Durmo</span>
+              <input id="sleepTime" placeholder="23:00" />
+            </label>
+          </div>
+
+          <div class="row gap wrap">
+            <label class="field">
+              <span class="muted small">Alerta se estiver atrasado (ml)</span>
+              <input id="waterSlack" type="number" min="0" step="50" placeholder="Ex: 250" inputmode="numeric" />
+            </label>
+            <button id="btnSaveWaterConfig" class="btn">Salvar</button>
+          </div>
+
+          <p class="muted small">
+            O “ritmo da água” compara o quanto você já bebeu vs. o esperado pelo horário.
+            Ex.: se acorda 07:00 e dorme 23:00, a meta é distribuída nesse período.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="grid2">
+        <div class="panel">
+          <div class="row between wrap gap">
+            <h2>Remédios</h2>
+            <button id="btnSort" class="btn ghost">Ordenar agenda</button>
+          </div>
+
+          <form id="medForm" class="form">
+            <div class="row gap wrap">
+              <input id="medName" required placeholder="Nome (ex: Losartana)" />
+              <input id="medDose" placeholder="Dose (ex: 50mg)" />
+            </div>
+
+            <div class="row gap wrap">
+              <input id="medTimes" required placeholder="Horários (ex: 08:00, 14:00, 22:00)" />
+              <button class="btn" type="submit">Adicionar</button>
+            </div>
+
+            <div class="row gap wrap">
+              <input id="medStock" type="number" min="0" step="1" placeholder="Estoque (comprimidos) opcional" inputmode="numeric" />
+              <input id="medPerDose" type="number" min="0" step="1" placeholder="Qtd por dose (ex: 1)" inputmode="numeric" />
+              <input id="medLow" type="number" min="0" step="1" placeholder="Alerta baixo (ex: 5)" inputmode="numeric" />
+            </div>
+
+            <p class="muted small">
+              Dica: horários separados por vírgula (HH:MM). Se informar estoque + qtd/dose, o app baixa automaticamente ao marcar “tomado”.
+            </p>
+          </form>
+
+          <h3>Agenda de hoje</h3>
+          <div id="schedule" class="schedule"></div>
+        </div>
+
+        <div class="panel">
+          <h3>Meus remédios</h3>
+          <div id="medList" class="list"></div>
+
+          <hr class="hr" />
+
+          <h3>Backup</h3>
+          <p class="muted">Exportar/Importar seus dados (útil se trocar de iPhone).</p>
+          <div class="row gap wrap">
+            <button class="btn" id="btnExport">Exportar JSON</button>
+            <input type="file" id="fileImport" accept="application/json" />
+          </div>
+          <pre id="exportBox" class="code" hidden></pre>
+        </div>
+      </div>
+
+      <footer class="footer muted">
+        <small>
+          Observação iOS: notificações em segundo plano podem ser limitadas em PWAs sem backend.
+          Este app garante checklist, estoque e ritmo; lembretes aparecem melhor com o app aberto.
+        </small>
+      </footer>
+    </section>
+  </main>
+
+  <script src="./app.js"></script>
+</body>
+</html>
